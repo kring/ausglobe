@@ -6,6 +6,7 @@ var jsdoc = require('gulp-jsdoc');
 var uglify = require('gulp-uglify');
 var jasmine = require('gulp-jasmine');
 var exec = require('child_process').exec;
+var rjs = require('gulp-requirejs');
 
 //TODO: figure out if there's any value to this
 //var refresh = require('gulp-livereload');  
@@ -77,3 +78,29 @@ gulp.task('default', function() {
     gulp.watch('src/*.js', ['scripts']);
 })
 
+gulp.task('combine', function() {
+    rjs({
+        name: 'ui/main',
+        out: 'ui.js',
+        baseUrl: 'public',
+        paths: {
+            'Cesium': './cesium/Source',
+            'ui': './viewer',
+            'domReady': './cesium/ThirdParty/requirejs-2.1.9/domReady',
+            'knockout.mapping': './third_party/knockout.mapping',
+            'requireLib': './cesium/ThirdParty/requirejs-2.1.9/require'
+        },
+        map: {
+            '*': {
+                'knockout': 'Cesium/ThirdParty/knockout'
+            }
+        },
+        shim: {
+            'ausglobe': {
+                deps: ['ui/GlobalCesium'],
+                exports: 'ausglobe'
+            }
+        },
+        include: ['requireLib']
+    }).pipe(gulp.dest('./public/build/'));
+});
